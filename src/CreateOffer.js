@@ -1,5 +1,5 @@
 import React from 'react';
-import { LCDClient, MsgExecuteContract, Extension, Wallet } from '@terra-money/terra.js';
+import { LCDClient, MsgExecuteContract, Extension } from '@terra-money/terra.js';
 
 const terra = new LCDClient({
   URL: 'https://tequila-lcd.terra.dev',
@@ -7,7 +7,7 @@ const terra = new LCDClient({
 });
 
 const CONTRACT = 'terra1hhgpedc3w04qe3x72j4mvx7xamv6yauap7hj5j'
-const extension = new Extension();
+const ext = new Extension();
 
 class Offers extends React.Component {
 
@@ -26,6 +26,17 @@ class Offers extends React.Component {
     this.handleMinAmountChange = this.handleMinAmountChange.bind(this)
     this.handleMaxAmountChange = this.handleMaxAmountChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.initWallet = this.initWallet.bind(this)
+  }
+
+  componentDidMount() {
+    this.initWallet()
+  }
+
+  async initWallet() {
+    let response = await ext.request('connect')
+    console.log('wallet response', response.payload)
+    localStorage.setItem('walletAddress', response.payload.address)
   }
 
   handleTypeChange(evt) {
@@ -46,17 +57,10 @@ class Offers extends React.Component {
     this.setState({offer})
   }
 
-  handleSubmit(evt) {
+  async handleSubmit(evt) {
     evt.preventDefault()
-    console.log(this.state)
-    extension.on("connect", (wallet) => {
-      console.log('wallet', wallet)
-      this.setState({wallet})
-    });
-    console.log(this.state.offer)
-    extension.connect();
     const createOfferMsg = new MsgExecuteContract()
-    createOfferMsg.sender = 'terra17h9mgy45yht6eg9mvyna52e05nfh8slg6s8tse'
+    createOfferMsg.sender = localStorage.getItem('walletAddress')
     createOfferMsg.contract = CONTRACT
     createOfferMsg.execute_msg = {
       "create": {
@@ -69,19 +73,13 @@ class Offers extends React.Component {
       }
     }
 
-    extension.post({
+    let res = await ext.post({
       msgs: [createOfferMsg]
     });
+    console.log('res', res)
   }
 
-  componentDidMount() {
-    extension.on("connect", (wallet) => {
-      console.log('wallet', wallet)
-      this.setState({wallet})
-    });
-    extension.connect();
-  }
-  
+ 
   render() {
     return (
       <div>
