@@ -1,6 +1,8 @@
 import React from 'react';
 import { LCDClient, Key } from '@terra-money/terra.js';
 
+import flagCO from './assets/co.svg';
+
 const terra = new LCDClient({
   URL: 'https://tequila-lcd.terra.dev',
   chainID: 'tequila-0004',
@@ -25,9 +27,20 @@ class Offers extends React.Component {
   
   render() {
     return (
-      <ul>
+      <ul class="offers-list">
         {this.state.offers.map(offer=> {
-          return (<li>{offer.owner} - {offer.order_type} - {offer.fiat_currency} - {offer.min_amount} - {offer.max_amount}</li>)
+          return (
+          <li>
+              <div class="currency">
+                <img src={flagCO} alt="Flag Colombia"/> 
+                <p>{offer.fiat_currency}</p>
+              </div>
+              <p class="owner">{offer.owner}</p>
+              <p>{offer.min_amount} - {offer.max_amount}</p>
+
+            <button type="button">{offer.order_type}</button>
+
+          </li>)
         })}
       </ul>
     )

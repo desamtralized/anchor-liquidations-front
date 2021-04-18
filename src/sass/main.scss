@@ -1,11 +1,26 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
+/* Reset */
+* { margin: 0; padding: 0; border: 0;}
+
+
+/* Colors */
+$primary: #EF6100;
+$secondary: #FBA367;
+$base-text: #3E2E26;
+$border: #eeeeee;
+$white: #ffffff;
+
+
+/* Main Style */
+
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    margin: 0 auto;
+    font-family: 'Poppins', sans-serif;
+    color: $base-text;
+    max-width: 1000px;
   }
 
 
@@ -13,4 +28,54 @@ header {
     background-color: #fff;
     height: 90px;
     display: flex;
+    padding: 8px 32px;
+
+    .logo {
+        width: 200px;
+    }
+
+}
+
+.offers-list {
+
+    padding: 0;
+
+    li {
+        list-style: none;
+        padding: 24px;
+        margin: 16px;
+        border: 1px solid $border;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+       
+
+            .currency {
+                text-align: center;
+                font-size: 12px;
+                font-weight: 600;
+                
+                img {width: 24px;}
+            }
+
+            .owner {
+                text-align: left;
+                font-weight: 700;
+                flex-wrap: wrap;
+           
+            }
+
+        button {
+            background-color: #EF6100;
+            color: $white;
+            padding: 8px 24px;
+            border-radius: 56px;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            
+        }
+    }
+
 }
