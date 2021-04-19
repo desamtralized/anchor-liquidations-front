@@ -43,7 +43,7 @@ class Offers extends React.Component {
               <p class="owner">{formatAddress(offer.owner)}</p>
               <p>Min ${formatAmount(offer.min_amount)} - Max ${formatAmount(offer.max_amount)}</p>
 
-              <p class="price">COP$ 3,608.00</p>
+              {/* <p class="price">COP$ 3,608.00</p> */}
 
             <Link to={`/offer/${offer.id}`}>
               <button type="button">{this.offerTypeLabels[offer.offer_type]}</button>
