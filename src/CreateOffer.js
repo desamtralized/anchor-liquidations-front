@@ -1,16 +1,16 @@
 import React from 'react';
 import { LCDClient, MsgExecuteContract, Extension } from '@terra-money/terra.js';
+import { formatAddress } from './utils';
 
 const terra = new LCDClient({
   URL: 'https://tequila-lcd.terra.dev',
   chainID: 'tequila-0004',
 });
 
-const CONTRACT = 'terra1hhgpedc3w04qe3x72j4mvx7xamv6yauap7hj5j'
+const CONTRACT = 'terra1uffnkfu6wk9szpgar5ythyxtv0dxpylnxq8ref'
 const ext = new Extension();
 
 class Offers extends React.Component {
-
 
   constructor(props) {
     super(props);
@@ -30,13 +30,10 @@ class Offers extends React.Component {
   }
 
   componentDidMount() {
-    this.initWallet()
-  }
-
-  async initWallet() {
-    let response = await ext.request('connect')
-    console.log('wallet response', response.payload)
-    localStorage.setItem('walletAddress', response.payload.address)
+    let orderQuery = {"load_offers": {"fiat_currency": "cop"}};
+    terra.wasm.contractQuery('terra1uffnkfu6wk9szpgar5ythyxtv0dxpylnxq8ref', orderQuery).then(offers => {
+      this.setState({offers})
+    })
   }
 
   handleTypeChange(evt) {
@@ -78,7 +75,6 @@ class Offers extends React.Component {
     });
     console.log('res', res)
   }
-
  
   render() {
     return (

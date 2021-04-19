@@ -198,5 +198,10 @@ header {
         cursor: pointer;
         height: 40px;
     }
+
+    button:disabled,
+    button[disabled] {
+        background-color: gray;
+    }
     
 }
