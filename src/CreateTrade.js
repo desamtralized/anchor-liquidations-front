@@ -1,5 +1,5 @@
 import React from 'react';
-import { LCDClient, MsgExecuteContract, Extension } from '@terra-money/terra.js';
+import { LCDClient, MsgInstantiateContract, Extension, Msg, Coin, Coins, Denom, Dec } from '@terra-money/terra.js';
 import { withRouter } from "react-router-dom";
 import { formatAddress, formatAmount } from './utils';
 
@@ -7,7 +7,7 @@ import flagCO from './assets/co.svg';
 import flagUST from './assets/ic_ust.svg';
 import icArrowDown from './assets/ic_arrow.svg';
 
-import { OFFERS_CONTRACT, USD_COP_API } from './constants';
+import { OFFERS_CONTRACT, USD_COP_API, TRADE_CONTRACT_CODE_ID } from './constants';
 
 const terra = new LCDClient({
   URL: 'https://tequila-lcd.terra.dev',
@@ -23,6 +23,7 @@ class CreateTrade extends React.Component {
 
     this.handleCopAmountChange = this.handleCopAmountChange.bind(this)
     this.handleUstAmountChange = this.handleUstAmountChange.bind(this)
+    this.openTrade = this.openTrade.bind(this)
 
     this.state = {
       offer: {
@@ -74,6 +75,27 @@ class CreateTrade extends React.Component {
     this.setState({copAmount, ustAmount, tradingFee, finalAmount, valid})
   }
 
+  async openTrade(evt) {
+    const walletAddress = localStorage.getItem('walletAddress')
+    evt.preventDefault()
+    const initMsg = {
+      offer: this.state.offer.id,
+      amount: parseInt(this.state.ustAmount)
+    }
+    const ustAmount = this.state.ustAmount * 1000000
+    const coin = Coin.fromData({denom: Denom.USD, amount: ustAmount})
+    const coins = new Coins([coin])
+    const createTradeMsg = new MsgInstantiateContract(walletAddress, TRADE_CONTRACT_CODE_ID, 
+      initMsg, coins)
+
+    this.setState({loading: true})
+    let res = await ext.post({
+      msgs: [createTradeMsg]
+    });
+    this.setState({loading: false})
+    console.log('res', res)
+  }
+
   render() {
     return (
       <section class="create-trade">
@@ -106,15 +128,18 @@ class CreateTrade extends React.Component {
             </div>
             <div className="row">
               <p>You will get</p>
-              <p class="bold">{this.state.finalAmount} UST</p>
+              <p className="bold">{this.state.finalAmount} UST</p>
             </div>
             <div className="row">
               <p>You will pay</p>
-              <p class="bold color">{this.state.copAmount} COP</p>
+              <p className="bold color">{this.state.copAmount} COP</p>
             </div>
           </div>
 
-          <button disabled={!this.state.valid}>open trade</button>
+          {this.state.loading && <button disabled>opening trade...</button>}
+          {!this.state.loading && <button 
+            onClick={this.openTrade}
+            disabled={!this.state.valid}>open trade</button>}
 
       </section>
     )
