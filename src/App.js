@@ -1,13 +1,12 @@
 import Offers from './Offers';
-import CreateOffer from './CreateOffer';
-import CreateTrade from './CreateTrade';
+import Offer from './Offer';
 import Header from './Header';
+import Trade from './Trade';
 
 import {
   BrowserRouter as Router,
   Switch,
-  Route,
-  Link
+  Route
 } from "react-router-dom";
 
 import './css/main.min.css';
@@ -19,15 +18,23 @@ function App() {
         <Header />       
         <section className="App-header">
           <Switch>
+            {/* Create Trade */}
             <Route path="/offer/:id">
-              <CreateTrade />
+              <Offer />
             </Route>
+
+            {/* Trade Details */}
+            <Route path="/trade/:id">
+              <Trade/>
+            </Route>
+
+            {/* Home */}
             <Route path="/">
               <Offers/>
             </Route>
+
           </Switch>
         </section>
-
       </div>
     </Router>
   );

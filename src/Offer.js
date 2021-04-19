@@ -16,7 +16,7 @@ const terra = new LCDClient({
 
 const ext = new Extension();
 
-class CreateTrade extends React.Component {
+class Offer extends React.Component {
 
   constructor(props) {
     super(props);
@@ -24,6 +24,7 @@ class CreateTrade extends React.Component {
     this.handleCopAmountChange = this.handleCopAmountChange.bind(this)
     this.handleUstAmountChange = this.handleUstAmountChange.bind(this)
     this.openTrade = this.openTrade.bind(this)
+    this.getTxResult = this.getTxResult.bind(this)
 
     this.state = {
       offer: {
@@ -38,7 +39,8 @@ class CreateTrade extends React.Component {
       copAmount: 0,
       tradingFee: 0,
       finalAmount: 0,
-      valid: false
+      valid: false,
+      loading: false
     }
   }
 
@@ -89,11 +91,35 @@ class CreateTrade extends React.Component {
       initMsg, coins)
 
     this.setState({loading: true})
-    let res = await ext.post({
+    ext.once('onPost', res => {
+      if (res.success) {
+        setTimeout(() => {
+          this.getTxResult(res.result.txhash)
+        }, 2000)
+      } else {
+        alert('Error')
+      }
+    })
+    ext.post({
       msgs: [createTradeMsg]
-    });
-    this.setState({loading: false})
-    console.log('res', res)
+    })
+  }
+
+  getTxResult(txHash, attempts = 0) {
+    terra.tx.txInfo(txHash).then(res => {
+      console.log('txInfo', res)
+      let tradeAddress = res.logs[0].events[0].attributes[2].value
+      this.setState({loading: false})
+      this.props.history.push(`/trade/${tradeAddress}`)
+    }).catch(err => {
+      attempts++;
+      if (attempts < 5) {
+        setTimeout(()=>{
+          this.getTxResult(txHash, attempts)
+        }, 2000)
+      }
+      console.log('failed to load trasaction info', err)
+    })
   }
 
   render() {
@@ -146,4 +172,4 @@ class CreateTrade extends React.Component {
   }
 }
 
-export default withRouter(CreateTrade);
+export default withRouter(Offer);
