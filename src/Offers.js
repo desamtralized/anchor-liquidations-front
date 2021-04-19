@@ -10,6 +10,8 @@ const terra = new LCDClient({
 
 class Offers extends React.Component {
 
+  offerTypeLabels = {"buy": "Sell", "sell": "Buy"}
+
   constructor(props) {
     super(props);
 
@@ -20,9 +22,16 @@ class Offers extends React.Component {
 
   componentDidMount() {
     let orderQuery = {"load_offers": {"fiat_currency": "cop"}};
-    terra.wasm.contractQuery('terra1hhgpedc3w04qe3x72j4mvx7xamv6yauap7hj5j', orderQuery).then(offers => {
+    terra.wasm.contractQuery('terra1uffnkfu6wk9szpgar5ythyxtv0dxpylnxq8ref', orderQuery).then(offers => {
       this.setState({offers})
     })
+  }
+
+  formatAddress(address) {
+    let start = address.substr(0, 8)
+    let length = address.length
+    let end = address.substr(length-6, length-1)
+    return `${start}...${end}`
   }
   
   render() {
@@ -35,12 +44,12 @@ class Offers extends React.Component {
                 <img src={flagCO} alt="Flag Colombia"/> 
                 <p>{offer.fiat_currency}</p>
               </div>
-              <p class="owner">terra1f9...4tky5r4</p>
-              <p>{offer.min_amount} - {offer.max_amount}</p>
+              <p class="owner">{this.formatAddress(offer.owner)}</p>
+              <p>Min ${(offer.min_amount/1000000).toFixed(2)} - Max ${(offer.max_amount/1000000).toFixed(2)}</p>
 
-              <p class="price">COP$ 3,950.00</p>
+              <p class="price">COP$ 3,608.00</p>
 
-            <button type="button">{offer.order_type}</button>
+            <button type="button">{this.offerTypeLabels[offer.offer_type]}</button>
 
           </li>)
         })}
