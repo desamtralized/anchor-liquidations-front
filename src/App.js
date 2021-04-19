@@ -19,7 +19,7 @@ function App() {
       </header>
 
       <section className="App-header">
-        {/*<Offers />*/}
+        {<Offers />}
         {/*<CreateOffer />*/}
         <CreateTrades />
       </section>
