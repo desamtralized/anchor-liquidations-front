@@ -35,8 +35,10 @@ class Offers extends React.Component {
                 <img src={flagCO} alt="Flag Colombia"/> 
                 <p>{offer.fiat_currency}</p>
               </div>
-              <p class="owner">{offer.owner}</p>
+              <p class="owner">terra1f9...4tky5r4</p>
               <p>{offer.min_amount} - {offer.max_amount}</p>
+
+              <p class="price">COP$ 3,950.00</p>
 
             <button type="button">{offer.order_type}</button>
 
