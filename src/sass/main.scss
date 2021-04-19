@@ -30,6 +30,7 @@ header {
     align-items: center;
     padding: 8px 32px;
     max-width: 1200px;
+    margin: 0 auto;
 
     .logo {
         width: 200px;
@@ -43,6 +44,7 @@ header {
         display: block;
         margin-left: auto;
         padding: 0px 24px;
+        cursor: pointer;
 
         p {
             font-family: 'Poppins', sans-serif;
