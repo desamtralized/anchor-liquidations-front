@@ -34,22 +34,23 @@ class Offers extends React.Component {
     return (
       <ul class="offers-list">
         {this.state.offers.map(offer=> {
-          return (
-          <li>
-              <div class="currency">
-                <img src={flagCO} alt="Flag Colombia"/> 
-                <p>{offer.fiat_currency}</p>
-              </div>
-              <p class="owner">{formatAddress(offer.owner)}</p>
-              <p>Min ${formatAmount(offer.min_amount)} - Max ${formatAmount(offer.max_amount)}</p>
+          if (offer.id != 3) {
+            return (
+              <li>
+                <div class="currency">
+                  <img src={flagCO} alt="Flag Colombia"/> 
+                  <p>{offer.fiat_currency}</p>
+                </div>
+                <p class="owner">{formatAddress(offer.owner)}</p>
+                <p>Min ${formatAmount(offer.min_amount)} - Max ${formatAmount(offer.max_amount)}</p>
 
-              <p class="price"> </p>
+                <p class="price"> </p>
 
-            <Link to={`/offer/${offer.id}`}>
-              <button type="button">{this.offerTypeLabels[offer.offer_type]}</button>
-            </Link>
-
-          </li>)
+              <Link to={`/offer/${offer.id}`}>
+                <button type="button">{this.offerTypeLabels[offer.offer_type]}</button>
+              </Link>
+            </li>)
+          }
         })}
       </ul>
     )

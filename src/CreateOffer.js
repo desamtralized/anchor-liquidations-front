@@ -15,7 +15,6 @@ class Offers extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log('props', props)
     this.state = {offer: {
       type: 'buy',
       fiat_currency: 'cop',

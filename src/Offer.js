@@ -84,11 +84,15 @@ class Offer extends React.Component {
       offer: this.state.offer.id,
       amount: parseInt(this.state.ustAmount)
     }
-    const ustAmount = this.state.ustAmount * 1000000
-    const coin = Coin.fromData({denom: Denom.USD, amount: ustAmount})
-    const coins = new Coins([coin])
-    const createTradeMsg = new MsgInstantiateContract(walletAddress, TRADE_CONTRACT_CODE_ID, 
-      initMsg, coins)
+
+    let createTradeMsg = new MsgInstantiateContract(walletAddress, TRADE_CONTRACT_CODE_ID, 
+      initMsg)
+    if (this.state.offer.offer_type == 'buy') {
+      const ustAmount = this.state.ustAmount * 1000000
+      const coin = Coin.fromData({denom: Denom.USD, amount: ustAmount})
+      const coins = new Coins([coin])
+      createTradeMsg.init_coins = coins
+    }
 
     this.setState({loading: true})
     ext.once('onPost', res => {
@@ -125,8 +129,8 @@ class Offer extends React.Component {
   render() {
     return (
       <section class="create-trade">
-
-        <h1>You are buying from <span>{formatAddress(this.state.offer.owner)}</span></h1>
+        {this.state.offer.offer_type == 'sell' && <h1>You are buying from <span>{formatAddress(this.state.offer.owner)}</span></h1>}
+        {this.state.offer.offer_type == 'buy' && <h1>You are selling to <span>{formatAddress(this.state.offer.owner)}</span></h1>}
         <h2>1 UST = COP$ {formatAmount(this.state.conversionRate, false)}</h2>
         <h2>{`Min $${formatAmount(this.state.offer.min_amount)} - Max $${formatAmount(this.state.offer.max_amount)}`}</h2>
 
@@ -153,19 +157,19 @@ class Offer extends React.Component {
               <p>{this.state.tradingFee} COP</p>
             </div>
             <div className="row">
-              <p>You will get</p>
+              {this.state.offer.offer_type == 'buy' && <p>You will send</p>}
+              {this.state.offer.offer_type == 'sell' && <p>You will get</p>}
               <p className="bold">{this.state.finalAmount} UST</p>
             </div>
             <div className="row">
-              <p>You will pay</p>
+              {this.state.offer.offer_type == 'buy' && <p>You will receive</p>}
+              {this.state.offer.offer_type == 'sell' && <p>You will pay</p>}
               <p className="bold color">{this.state.copAmount} COP</p>
             </div>
           </div>
 
           {this.state.loading && <button disabled>opening trade...</button>}
-          {!this.state.loading && <button 
-            onClick={this.openTrade}
-            disabled={!this.state.valid}>open trade</button>}
+          {!this.state.loading && <button onClick={this.openTrade}>open trade</button>}
 
       </section>
     )
