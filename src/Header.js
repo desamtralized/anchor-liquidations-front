@@ -9,8 +9,8 @@ import {
 } from "react-router-dom";
  
 const terra = new LCDClient({
-  URL: 'https://tequila-lcd.terra.dev',
-  chainID: 'tequila-0004',
+  URL: 'https://lcd.terra.dev',
+  chainID: 'columbus-4',
 });
 
 const ext = new Extension();

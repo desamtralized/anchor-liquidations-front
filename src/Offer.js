@@ -1,5 +1,5 @@
 import React from 'react';
-import { LCDClient, MsgInstantiateContract, Extension, Msg, Coin, Coins, Denom, Dec } from '@terra-money/terra.js';
+import { LCDClient, MsgInstantiateContract, Extension, Msg, Coin, Coins, Denom, Dec, StdFee } from '@terra-money/terra.js';
 import { withRouter } from "react-router-dom";
 import { formatAddress, formatAmount } from './utils';
 
@@ -94,6 +94,11 @@ class Offer extends React.Component {
       createTradeMsg.init_coins = coins
     }
 
+
+    const obj = new StdFee(1_000_000, { uusd: 300000 })
+
+    console.log('gasPrices', obj.gasPrices())
+
     this.setState({loading: true})
     ext.once('onPost', res => {
       if (res.success) {
@@ -105,7 +110,8 @@ class Offer extends React.Component {
       }
     })
     ext.post({
-      msgs: [createTradeMsg]
+      msgs: [createTradeMsg],
+      fee: obj
     })
   }
 
