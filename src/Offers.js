@@ -23,6 +23,9 @@ class Offers extends React.Component {
     this.fetchPrice = this.fetchPrice.bind(this);
     this.submitBid = this.submitBid.bind(this);
     this.handleBidAmountChanged = this.handleBidAmountChanged.bind(this);
+    this.fetchLiquidations = this.fetchLiquidations.bind(this);
+    this.liquidateAll = this.liquidateAll.bind(this);
+    this.clear = this.clear.bind(this);
 
     this.state = {
         offers: [],
@@ -30,22 +33,38 @@ class Offers extends React.Component {
         bid: 0,
         bidAmount: 0,
         price: 0,
+        liquidationMsgs: []
     }
   }
 
   componentDidMount() {
     this.fetchPrice();
     this.fetchBid();
-    let orderQuery = {"load_offers": {"fiat_currency": "cop"}};
-    fetch("http://157.245.223.82:8080/liquidations.json").then(res => {
-      return res.json()
-    }).then(liquidations => {
-      liquidations.sort((aL, bL) => bL.loanAmount - aL.loanAmount)
-      this.setState({liquidations})
-    })
+
+    setInterval(() => {
+      this.fetchLiquidations();
+    }, 1000)
+
     setInterval(() => {
       this.fetchPrice();
-    }, 5000)
+    }, 1000)
+  }
+
+  fetchLiquidations() {
+    fetch("http://157.245.223.82:8080/liquidations.js", {cache: "no-store"}).then(res => {
+      return res.json()
+    }).then(liquidations => {
+      liquidations.sort((aL, bL) => parseInt(bL.borrowedUstAmount) - parseInt(aL.borrowedUstAmount))
+      let liqs = [];
+      let borrowers = [];
+      liquidations.forEach(l => {
+        if (borrowers.indexOf(l.addr) === -1) {
+          borrowers.push(l.addr);
+          liqs.push(l);
+        }
+      })
+      this.setState({liquidations: liqs})
+    })
   }
 
   fetchPrice() {
@@ -54,6 +73,11 @@ class Offers extends React.Component {
       this.setState({price})
     });
   }
+
+  clear() {
+    this.setState({liquidationMsgs: []})
+  }
+
 
   submitBid(amount) {
     let submitBidMsg = {
@@ -118,6 +142,39 @@ class Offers extends React.Component {
     })
   }
 
+  addToLiquidations(borrower) {
+    const walletAddress = localStorage.getItem('walletAddress')
+    let overseerContract = "terra1tmnqgvg567ypvsvk6rwsga3srp7e3lg6u0elp8"
+    let liqs = this.state.liquidationMsgs;
+    let newMsg = new MsgExecuteContract(walletAddress, overseerContract, {
+      "liquidate_collateral": {
+        "borrower": borrower
+      }
+    })
+    liqs.push(newMsg);
+    this.setState({liquidationMsgs: liqs})
+  }
+
+  async liquidateAll() {
+    this.setState({loading: true})
+    const obj = new StdFee(1_000_000, { uusd: 200000 })
+
+    ext.once('onPost', res => {
+      if (res.success) {
+        setTimeout(() => {
+          this.getTxResult(res.result.txhash)
+        }, 2000)
+      } else {
+        console.log(res)
+        alert('Error')
+      }
+    })
+    ext.post({
+      msgs: this.state.liquidationMsgs,
+      gasPrices: obj.gasPrices(),
+    })
+  }
+
 
   async liquidate(borrower) {
     const walletAddress = localStorage.getItem('walletAddress')
@@ -126,7 +183,7 @@ class Offers extends React.Component {
       "liquidate_collateral": {
         "borrower": borrower
       }
-    })
+    });
 
     this.setState({loading: true})
     const obj = new StdFee(1_000_000, { uusd: 200000 })
@@ -152,16 +209,17 @@ class Offers extends React.Component {
       if (borrower) {
         localStorage.setItem(borrower, 'true');
       }
-      this.setState({loading: false})
+      console.log("DONE")
+      this.setState({loading: false, liquidationMsgs: []})
       setTimeout(() => {
         this.fetchBid();
       }, 5000)
     }).catch(err => {
       attempts++;
-      if (attempts < 10) {
+      if (attempts < 100) {
         setTimeout(()=>{
           this.getTxResult(txHash, borrower, attempts)
-        }, 2000)
+        }, 500)
       }
       console.log('failed to load trasaction info', err)
     })
@@ -193,6 +251,8 @@ class Offers extends React.Component {
           <li>
             <h4>{this.state.bid} UST remaining</h4>
             <button onClick={this.retractBid}>Retract</button>
+            <button onClick={this.liquidateAll}>Liquidate All {this.state.liquidationMsgs.length}</button>
+            <button onClick={this.clear}>clear</button>
           </li>
         }
         {this.state.bid === 0 && 
@@ -208,17 +268,19 @@ class Offers extends React.Component {
         }
         {this.state.liquidations.map(l =>
           <li>
-            {l.ltv > 1 &&
-              <p><b>{l.ltv}</b></p>
+            <p>{(parseFloat(l.bLunaAmount)/1000000).toFixed(6)} bLuna</p>
+            <p>{l.humanReadableUstAmount} UST</p>
+            {l.liquidationPrice <= this.state.price &&
+              <p><b>{l.liquidationPrice}</b></p>
             }
-            {l.ltv < 1 &&
-              <p>{l.ltv}</p>
+            {l.liquidationPrice > this.state.price &&
+              <p>{l.liquidationPrice}</p>
             }
-            <p>{parseInt(l.b.balance)/1000000} bLuna</p>
-            <p>{parseInt(l.loanAmount)/1000000} UST</p>
-            <p>{((l.loanAmount/l.b.balance)*2).toFixed(2)}</p>
-            {!localStorage.getItem(l.b.borrower) &&
-              <button onClick={()=> {this.liquidate(l.b.borrower)}}>Liquidate</button>
+            {!localStorage.getItem(l.addr) &&
+            <p>
+              <button onClick={()=> {this.liquidate(l.addr)}}>Liquidate</button>
+              <button onClick={()=> {this.addToLiquidations(l.addr)}}>Add</button>
+            </p>
             }
           </li>
         )}
