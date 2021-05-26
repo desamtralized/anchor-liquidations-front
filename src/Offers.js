@@ -51,7 +51,8 @@ class Offers extends React.Component {
   }
 
   fetchLiquidations() {
-    fetch("http://157.245.223.82:8080/liquidations.js", {cache: "no-store"}).then(res => {
+    //fetch("http://157.245.223.82:8080/liquidations.js", {cache: "no-store"}).then(res => {
+    fetch('http://159.65.186.180:8080/liquidations.js', {cache: "no-store"}).then(res => {
       return res.json()
     }).then(liquidations => {
       liquidations.sort((aL, bL) => parseInt(bL.borrowedUstAmount) - parseInt(aL.borrowedUstAmount))
@@ -270,10 +271,10 @@ class Offers extends React.Component {
           <li>
             <p>{(parseFloat(l.bLunaAmount)/1000000).toFixed(6)} bLuna</p>
             <p>{l.humanReadableUstAmount} UST</p>
-            {l.liquidationPrice <= this.state.price &&
+            {l.liquidationPrice > this.state.price &&
               <p><b>{l.liquidationPrice}</b></p>
             }
-            {l.liquidationPrice > this.state.price &&
+            {l.liquidationPrice < this.state.price &&
               <p>{l.liquidationPrice}</p>
             }
             {!localStorage.getItem(l.addr) &&
